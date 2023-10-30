@@ -1,6 +1,5 @@
 # hbgl
 
-
 ## List of GLFW releases
 
    [Releases](https://github.com/glfw/glfw/releases)

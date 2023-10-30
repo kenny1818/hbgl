@@ -24,7 +24,7 @@ HB_FUNC( IMAGENEW )
    // Dodanie obrazu do listy obrazów w HBGL
    pImage->pHBGL->imageCount++;
    pImage->pHBGL->images = realloc( pImage->pHBGL->images, pImage->pHBGL->imageCount * sizeof( Image * ) );
-   if( pImage->pHBGL->images == NULL )
+   if( ! pImage->pHBGL->images )
    {
       fprintf( stderr, "Failed to reallocate memory for image array.\n" );
       free( pImage );
