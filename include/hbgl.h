@@ -30,7 +30,18 @@ typedef enum bool
 } bool;
 
 typedef struct _HBGL HBGL;
+typedef struct _Font Font;
 typedef struct _Image Image;
+
+struct _Font
+{
+   HBGL *pHBGL;
+   unsigned int textureID;
+   int fontID;
+   int x;
+   int y;
+   stbtt_bakedchar cdata[ 380 ];
+};
 
 struct _Image
 {
@@ -65,6 +76,9 @@ struct _HBGL
 
    unsigned long background;
 
+   Font **fonts;               // Pointer to an array of Font structures
+   int fontCount;              // Number of fonts loaded
+
    Image **images;             // Pointer to an array of Image structures
    int imageCount;             // Number of images loaded
 };
@@ -73,7 +87,8 @@ struct _HBGL
 
 HB_EXTERN_BEGIN
 
-void FreeImage( Image *pImage );
+extern HB_EXPORT void FreeFont( Font *pFont );
+extern HB_EXPORT void FreeImage( Image *pImage );
 
 extern HB_EXPORT void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line );
 extern HB_EXPORT void CheckOpenGLError( const char* stmt, const char* fname, int line );

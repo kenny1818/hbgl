@@ -11,7 +11,7 @@ HB_FUNC( IMAGENEW )
 {
    static int imageCounter = 0;  // Statyczna zmienna do zliczania obrazów
 
-   Image *pImage = ( Image * ) malloc( sizeof( Image ) );
+   Image *pImage = malloc( sizeof( Image ) );
    if( ! pImage )
    {
       fprintf( stderr, "Failed to allocate memory for new image.\n" );
