@@ -93,6 +93,14 @@ extern HB_EXPORT void FreeImage( Image *pImage );
 extern HB_EXPORT void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line );
 extern HB_EXPORT void CheckOpenGLError( const char* stmt, const char* fname, int line );
 
+extern HB_EXPORT void Point( int x, int y, unsigned int color );
+extern HB_EXPORT void PointSize( int x, int y, int point_size, unsigned int color );
+extern HB_EXPORT void Line( int x1, int y1, int x2, int y2, unsigned int color );
+extern HB_EXPORT void LineWidth( int x1, int y1, int x2, int y2, int line_width, unsigned int color );
+extern HB_EXPORT void Rect( int x1, int y1, int x2, int y2, unsigned int color );
+extern HB_EXPORT void RectWidth( int x1, int y1, int x2, int y2, int line_width, unsigned int color );
+extern HB_EXPORT void FillRect( int x1, int y1, int x2, int y2, unsigned int color );
+
 HB_EXTERN_END
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
