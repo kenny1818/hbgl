@@ -18,6 +18,8 @@ HB_FUNC( IMAGENEW )
       hb_ret();
    }
 
+   memset( pImage, 0, sizeof( Image ) );
+
    pImage->pHBGL = hb_parptr( 1 );  // Ustawiamy wskaźnik do HBGL
    const char *image_path = hb_parc( 2 );
 

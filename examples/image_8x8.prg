@@ -10,7 +10,7 @@ PROCEDURE Main()
    LOCAL img := ImageNew( app, "../docs/assets/img/8x8.png" )
    LOCAL i, j
 
-   Background( app, 0x000000 )
+   Background( app, 0x323232 )
 
    DO WHILE( ! MainLoop( app ) )
 
