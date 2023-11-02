@@ -3,7 +3,7 @@
 
 -olib/${hb_plat}/${hb_comp}/${hb_name}
 
--w3 -es2 -gc3
+-w3 -es2 -gc3 -c=iso99
 
 -iinclude
 
