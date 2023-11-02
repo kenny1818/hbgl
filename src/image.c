@@ -78,6 +78,10 @@ HB_FUNC( DRAWIMAGE )
    int width = hb_parni( 4 );
    int height = hb_parni( 5 );
 
+   // Aktualizacja pozycji obrazu
+   pImage->x = x;
+   pImage->y = y;
+
    bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
    if( ! wasEnabled )
    {

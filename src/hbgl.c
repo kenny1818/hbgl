@@ -103,11 +103,11 @@ static void printDiagnostics( HBGL *pHBGL )
       printf( "Total Fonts: %d\n", pHBGL->fontCount );
       for( int i = 0; i < pHBGL->fontCount; i++ )
       {
-         Font *font = pHBGL->fonts[ i ];
-         printf( "Font ID: %d\n", font->fontID );
-         printf( "Texture ID: %u\n", font->textureID );
-         printf( "x: %d\n", font->x );
-         printf( "y: %d\n", font->y );
+         Font *pFont = pHBGL->fonts[ i ];
+         printf( "Font ID: %d\n", pFont->fontID );
+         printf( "Texture ID: %u\n", pFont->textureID );
+         printf( "x: %d\n", pFont->x );
+         printf( "y: %d\n", pFont->y );
       }
    }
 
@@ -117,14 +117,14 @@ static void printDiagnostics( HBGL *pHBGL )
       printf( "Total Images: %d\n", pHBGL->imageCount );
       for( int i = 0; i < pHBGL->imageCount; i++ )
       {
-         Image *image = pHBGL->images[ i ];
-         printf( "Image ID: %d\n", image->imageID );
-         printf( "Texture ID: %u\n", image->textureID );
-         printf( "x: %d\n", image->x );
-         printf( "y: %d\n", image->y );
-         printf( "Width: %d\n", image->width );
-         printf( "Height: %d\n", image->height );
-         printf( "Channels: %d\n", image->channels );
+         Image *pImage = pHBGL->images[ i ];
+         printf( "Image ID: %d\n", pImage->imageID );
+         printf( "Texture ID: %u\n", pImage->textureID );
+         printf( "x: %d\n", pImage->x );
+         printf( "y: %d\n", pImage->y );
+         printf( "Width: %d\n", pImage->width );
+         printf( "Height: %d\n", pImage->height );
+         printf( "Channels: %d\n", pImage->channels );
       }
    }
 
@@ -206,23 +206,31 @@ HB_FUNC( WINDOWNEW )
    hb_retptr( pHBGL );
 }
 
+/*
+ * Using glfwWaitEventsTimeout() instead of glfwWaitEvents() to allow the application
+ * to periodically wake up from the event wait state. This is beneficial for performing
+ * background tasks such as updating game state, handling network communications, or
+ * carrying out periodic checks within the application. The timeout is set to 0.5 seconds,
+ * which is a reasonable interval to keep the application responsive without consuming
+ * too much CPU. It strikes a balance between efficiency and responsiveness.
+ */
 /* MainLoop( pHBGL ) --> NIL */
 HB_FUNC( MAINLOOP )
 {
    HBGL *pHBGL = hb_parptr( 1 );
-
    bool state;
 
    pHBGL->closeFlag = glfwWindowShouldClose( pHBGL->window );
    glfwSetWindowShouldClose( pHBGL->window, GLFW_FALSE );
 
-   state = glfwGetWindowAttrib( pHBGL->window, GLFW_ICONIFIED ) ;
-   if( state == T )        // if window is minimized
+   state = glfwGetWindowAttrib( pHBGL->window, GLFW_ICONIFIED );
+   if( state == T )
    {
-      while( state == T )  // stop loop execution
+      while( state == T )
       {
          state = glfwGetWindowAttrib( pHBGL->window, GLFW_ICONIFIED );
-         glfwWaitEvents(); // wait for events
+
+         glfwWaitEventsTimeout( 0.5 );
       }
    }
    hb_retl( pHBGL->closeFlag );

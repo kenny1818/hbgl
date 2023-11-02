@@ -82,7 +82,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    size_t size = ftell( fp );
    fseek( fp, 0, SEEK_SET );
 
-   unsigned char *ttf_buffer = ( unsigned char * ) malloc( size );
+   unsigned char *ttf_buffer = malloc( size );
    if( ! ttf_buffer )
    {
       fprintf( stderr, "Failed to allocate memory for font buffer.\n" );
@@ -210,6 +210,10 @@ HB_FUNC( DRAWFONT )
    const char *text = hb_parc( 4 );
    float fontSize = ( float ) hb_parnd( 5 );
    unsigned int color = hb_parni( 6 );
+
+   // Aktualizacja pozycji obrazu
+   pFont->x = x;
+   pFont->y = y;
 
    bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
    if( ! wasEnabled )
