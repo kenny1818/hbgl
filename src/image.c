@@ -41,8 +41,21 @@ HB_FUNC( IMAGENEW )
    if( ! data )
    {
       fprintf( stderr, "Failed to load image: %s\n", image_path );
-      free( pImage );
-      hb_ret();
+      // Cleanup if image loading failed
+      pImage->pHBGL->imageCount--;
+      if( pImage->pHBGL->imageCount > 0 )
+      {
+         pImage->pHBGL->images[ pImage->pHBGL->imageCount ] = NULL;
+      }
+      else
+      {
+         free( pImage->pHBGL->images );
+         pImage->pHBGL->images = NULL;
+      }
+
+      // Returning Image with zeroed dimensions to avoid errors with unloaded images.
+      memset( pImage, 0, sizeof( Image ) );
+      hb_retptr( pImage );
    }
 
    glGenTextures( 1, &pImage->textureID );
@@ -78,30 +91,37 @@ HB_FUNC( DRAWIMAGE )
    int width = hb_parni( 4 );
    int height = hb_parni( 5 );
 
-   // Aktualizacja pozycji obrazu
-   pImage->x = x;
-   pImage->y = y;
-
-   bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
-   if( ! wasEnabled )
+   if( pImage && pImage->pHBGL && pImage->pHBGL->images )
    {
-      glEnable( GL_TEXTURE_2D );
+      // Aktualizacja pozycji obrazu
+      pImage->x = x;
+      pImage->y = y;
+
+      bool wasEnabled = glIsEnabled( GL_TEXTURE_2D );
+      if( ! wasEnabled )
+      {
+         glEnable( GL_TEXTURE_2D );
+      }
+
+      glBindTexture( GL_TEXTURE_2D, pImage->textureID );
+
+      glBegin( GL_QUADS );
+         glTexCoord2f( 0.0f, 1.0f ); glVertex2f( ( float )   x, ( float ) ( y + height ) );
+         glTexCoord2f( 1.0f, 1.0f ); glVertex2f( ( float ) ( x + width ), ( float ) ( y + height ) );
+         glTexCoord2f( 1.0f, 0.0f ); glVertex2f( ( float ) ( x + width ), ( float ) y );
+         glTexCoord2f( 0.0f, 0.0f ); glVertex2f( ( float )   x, ( float ) y );
+      glEnd();
+
+      glBindTexture( GL_TEXTURE_2D, 0 );
+
+      if( ! wasEnabled )
+      {
+         glDisable( GL_TEXTURE_2D );
+      }
    }
-
-   glBindTexture( GL_TEXTURE_2D, pImage->textureID );
-
-   glBegin( GL_QUADS );
-      glTexCoord2f( 0.0f, 1.0f ); glVertex2f( ( float )   x, ( float ) ( y + height ) );
-      glTexCoord2f( 1.0f, 1.0f ); glVertex2f( ( float ) ( x + width ), ( float ) ( y + height ) );
-      glTexCoord2f( 1.0f, 0.0f ); glVertex2f( ( float ) ( x + width ), ( float ) y );
-      glTexCoord2f( 0.0f, 0.0f ); glVertex2f( ( float )   x, ( float ) y );
-   glEnd();
-
-   glBindTexture( GL_TEXTURE_2D, 0 );
-
-   if( ! wasEnabled )
+   else
    {
-      glDisable( GL_TEXTURE_2D );
+      hb_ret();
    }
 }
 
@@ -109,28 +129,62 @@ HB_FUNC( DRAWIMAGE )
 HB_FUNC( SETIMAGEWIDTH )
 {
    Image *pImage = hb_parptr( 1 );
-   pImage->width = hb_parni( 2 );
+   int width = hb_parni( 2 );
+
+   if( pImage )
+   {
+      pImage->width = width;
+   }
+   else
+   {
+      hb_ret();
+   }
 }
 
 /* SetImageHeight( pImage, height ) --> NIL */
 HB_FUNC( SETIMAGEHEIGHT )
 {
    Image *pImage = hb_parptr( 1 );
-   pImage->height = hb_parni( 2 );
+   int height = hb_parni( 2 );
+
+   if( pImage )
+   {
+      pImage->height = height;
+   }
+   else
+   {
+      hb_ret();
+   }
 }
 
 /* GetImageWidth( pImage ) --> width */
 HB_FUNC( GETIMAGEWIDTH )
 {
    Image *pImage = hb_parptr( 1 );
-   hb_retni( pImage->width );
+
+   if( pImage )
+   {
+      hb_retni( pImage->width );
+   }
+   else
+   {
+      hb_ret();
+   }
 }
 
 /* GetImageHeight( pIMAGE ) --> height */
 HB_FUNC( GETIMAGEHEIGHT )
 {
    Image *pImage = hb_parptr( 1 );
-   hb_retni( pImage->height );
+
+   if( pImage )
+   {
+      hb_retni( pImage->height );
+   }
+   else
+   {
+      hb_ret();
+   }
 }
 
 void FreeImage( Image *pImage )

@@ -22,16 +22,16 @@ PROCEDURE Main()
 
       BeginDrawing( app )
 
-         totalImagesWidth := 5 * 128 + 4 * spaceBetweenImages       // dla pięciu obrazów
-         startX := ( GetWindowWidth( app ) - totalImagesWidth ) / 2 // wyśrodkuj wszystkie obrazy
-         startY := ( GetWindowHeight( app ) - 128 ) / 2
+         totalImagesWidth := 5 * GetImageWidth( img1 ) + 4 * spaceBetweenImages // dla pięciu obrazów
+         startX := ( GetWindowWidth( app ) - totalImagesWidth ) / 2             // wyśrodkuj wszystkie obrazy
+         startY := ( GetWindowHeight( app ) - GetImageWidth( img1 ) ) / 2
 
          // Rysowanie każdego obrazu osobno
-         DrawImage( img1, startX, startY, 128, 128 )
-         DrawImage( img2, startX + 128 + spaceBetweenImages, startY, 128, 128 )
-         DrawImage( img3, startX + 2 * ( 128 + spaceBetweenImages ), startY, 128, 128 )
-         DrawImage( img4, startX + 3 * ( 128 + spaceBetweenImages ), startY, 128, 128 )
-         DrawImage( img5, startX + 4 * ( 128 + spaceBetweenImages ), startY, 128, 128 )
+         DrawImage( img1, startX, startY, GetImageWidth( img1 ), GetImageHeight( img1 ) )
+         DrawImage( img2, startX + GetImageWidth( img1 ) + spaceBetweenImages, startY, GetImageWidth( img2 ), GetImageHeight( img2 ) )
+         DrawImage( img3, startX + 2 * ( GetImageWidth( img1 ) + spaceBetweenImages ), startY, GetImageWidth( img3 ), GetImageHeight( img3 ) )
+         DrawImage( img4, startX + 3 * ( GetImageWidth( img1 ) + spaceBetweenImages ), startY, GetImageWidth( img4 ), GetImageHeight( img4 ) )
+         DrawImage( img5, startX + 4 * ( GetImageWidth( img1 ) + spaceBetweenImages ), startY, GetImageWidth( img5 ), GetImageHeight( img5 ) )
 
       EndDrawing( app )
       WaitEvents()

@@ -81,9 +81,11 @@ struct _HBGL
 
    Font **fonts;               // Pointer to an array of Font structures
    int fontCount;              // Number of fonts loaded
+   int failedFontCount;        // Unloaded font counter
 
    Image **images;             // Pointer to an array of Image structures
    int imageCount;             // Number of images loaded
+   int failedImageCount;       // Unloaded image counter
 };
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
