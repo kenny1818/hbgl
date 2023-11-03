@@ -41,6 +41,10 @@ HB_FUNC( IMAGENEW )
    if( ! data )
    {
       fprintf( stderr, "Failed to load image: %s\n", image_path );
+
+      // Increment the counter of failed image loads
+      pImage->pHBGL->failedImageCount++;
+
       // Cleanup if image loading failed
       pImage->pHBGL->imageCount--;
       if( pImage->pHBGL->imageCount > 0 )
@@ -121,6 +125,7 @@ HB_FUNC( DRAWIMAGE )
    }
    else
    {
+      // Error code
       hb_ret();
    }
 }
