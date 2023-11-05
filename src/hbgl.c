@@ -4,6 +4,9 @@
 
 #include "hbgl.h"
 
+static ErrLog errorLogs[ MAX_ERROR_LOGS ]; // Tablica do przechowywania informacji o błędach
+static int errorLogCount = 0;              // Zmienna śledząca ilość zalogowanych błędów
+
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // static
 static void cursor_position_callback( GLFWwindow *window, double x, double y )
@@ -111,7 +114,7 @@ static void printDiagnostics( HBGL *pHBGL )
       }
 
    printf( "\n" );
-
+   /* TO DO
    if( pHBGL->fontCount > 0 && pHBGL->fonts[ 0 ] )
    {
       printf( "\n" );
@@ -142,15 +145,53 @@ static void printDiagnostics( HBGL *pHBGL )
          printf( "Channels: %d\n", pImage->channels );
       }
    }
+   */
+   // Wyświetlanie komunikatów o błędach
+   if( errorLogCount > 0 )
+   {
+      printf( "Error Log:\n" );
+      for( int i = 0; i < errorLogCount; i++ )
+      {
+         printf( "Error %d: %s (code %d) at %s:%d\n",
+            i,
+            errorLogs[ i ].description,
+            errorLogs[ i ].errorCode,
+            errorLogs[ i ].file,
+            errorLogs[ i ].line );
+      }
+
+      // Opcjonalnie, można wyczyścić bufor błędów po wyświetleniu
+      // Można też zdecydować, że bufor błędów będzie się czyścił automatycznie po przekroczeniu pewnej ilości zapisanych błędów.
+      errorLogCount = 0;
+   }
 
    fflush( stdout );
 }
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // internal
-void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line )
+void CheckHBGLError( HBGLErrorCode error_code, const char *file, int line, const char *format, ... )
 {
-   printf( "[HBGL ERROR] %s (code %d) at %s:%d\n", description, error_code, file, line );
+   char buffer[ 256 ]; // Zakładam, że 256 bajtów wystarczy na opis błędu
+   va_list args;
+   va_start( args, format );
+   vsnprintf( buffer, sizeof( buffer ), format, args );
+   va_end( args );
+
+   if( errorLogCount < MAX_ERROR_LOGS )
+   {
+      errorLogs[ errorLogCount ].errorCode = error_code;
+      snprintf( errorLogs[ errorLogCount ].description, sizeof( errorLogs[ errorLogCount ].description ), "%s", buffer );
+      snprintf( errorLogs[ errorLogCount ].file, sizeof( errorLogs[ errorLogCount ].file ), "%s", file );
+      errorLogs[ errorLogCount ].line = line;
+      errorLogCount++;
+   }
+   /*
+    * Zostawiam zakomentowane wywołanie printf, aby móc szybko przywrócić
+    * wyświetlanie błędów w konsoli, w przypadku wyłączenia funkcji printDiagnostics.
+    * Odkomentuj poniższą linię, jeśli potrzebujesz natychmiastowego logowania błędów do konsoli.
+    */
+   //printf("[HBGL ERROR] %s (code %d) at %s:%d\n", buffer, error_code, file, line);
 }
 
 void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode )
@@ -284,7 +325,7 @@ HB_FUNC( ENDDRAWING )
    HBGL *pHBGL = hb_parptr( 1 );
 
    printDiagnostics( pHBGL );
-   CHECK_OPENGL_ERROR( "end_drawing" );
+   REPORT_OPENGL_ERROR( "end_drawing" );
    glfwSwapBuffers( pHBGL->window );
 }
 

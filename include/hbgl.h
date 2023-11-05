@@ -2,6 +2,7 @@
 #define HBGL_H_
 
 #include <math.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -16,12 +17,26 @@
 #include "hbapiitm.h"
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
+
+#define MAX_ERROR_LOGS 100 // Liczba błędów do zalogowania
+
 typedef enum
 {
    HBGL_SUCCESS = 0,
    HBGL_ERROR_WINDOW_CREATION_FAILED,
+
    HBGL_ERROR_LOAD_IMAGE_FAILED,
-   HBGL_ERROR_LOAD_FONT_FAILED,
+
+   HBGL_ERROR_FONT_UTF8_DECODE,
+   HBGL_ERROR_FONT_FILE_NOT_FOUND,
+   HBGL_ERROR_FONT_MEMORY_ALLOCATION,
+   HBGL_ERROR_FONT_ARRAY_REALLOCATION,
+   HBGL_ERROR_FONT_FILE_OPEN,
+   HBGL_ERROR_FONT_FILE_READ,
+   HBGL_ERROR_FONT_INITIALIZATION,
+   HBGL_ERROR_FONT_DRAW_FONT_FAILED,
+   HBGL_ERROR_FONT_INVALID_COLOR_VALUE,
+
    HBGL_ERROR_OUT_OF_MEMORY,
    // ...
 } HBGLErrorCode;
@@ -33,8 +48,17 @@ typedef enum bool
 } bool;
 
 typedef struct _HBGL HBGL;
+typedef struct _ErrLog ErrLog;
 typedef struct _Font Font;
 typedef struct _Image Image;
+
+struct _ErrLog
+{
+   HBGLErrorCode errorCode;
+   char description[ 256 ];
+   char file[ 256 ];
+   int line;
+};
 
 struct _Font
 {
@@ -95,8 +119,8 @@ HB_EXTERN_BEGIN
 extern HB_EXPORT void FreeFont( Font *pFont );
 extern HB_EXPORT void FreeImage( Image *pImage );
 
-extern HB_EXPORT void CheckHBGLError( HBGLErrorCode error_code, const char* description, const char* file, int line );
 extern HB_EXPORT void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode );
+extern HB_EXPORT void CheckHBGLError( HBGLErrorCode error_code, const char *file, int line, const char *format, ... );
 
 extern HB_EXPORT void Point( int x, int y, unsigned int color );
 extern HB_EXPORT void PointSize( int x, int y, int point_size, unsigned int color );
@@ -110,17 +134,16 @@ HB_EXTERN_END
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 // macros
-#define CHECK_OPENGL_ERROR( stmt ) \
+#define REPORT_OPENGL_ERROR( stmt ) \
    GLenum errCode; \
    CheckOpenGLError( stmt, __FILE__, __LINE__, &errCode ); \
    if( errCode != GL_NO_ERROR ) return;
 
-#define CHECK_HBGL_ERROR( error_code, description ) \
+#define REPORT_HBGL_ERROR( error_code, description, ... ) \
    do { \
       HBGLErrorCode code = ( error_code ); \
       if( code != HBGL_SUCCESS ) { \
-         CheckHBGLError( code, description, __FILE__, __LINE__ ); \
-         return NULL; \
+         CheckHBGLError( code, __FILE__, __LINE__, description, ##__VA_ARGS__ ); \
       } \
    } while( 0 )
 

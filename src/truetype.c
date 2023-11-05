@@ -50,7 +50,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    Font *pFont = malloc( sizeof( Font ) );
    if( ! pFont )
    {
-      fprintf( stderr, "Failed to allocate memory for new font.\n" );
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_MEMORY_ALLOCATION, "Failed to allocate memory for new font." );
       return NULL;
    }
 
@@ -63,7 +63,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    pFont->pHBGL->fonts = realloc( pFont->pHBGL->fonts, pFont->pHBGL->fontCount * sizeof( Font * ) );
    if( ! pFont->pHBGL->fonts )
    {
-      fprintf( stderr, "Failed to reallocate memory for font array.\n" );
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_ARRAY_REALLOCATION, "Failed to reallocate memory for font array." );
       free( pFont );
       return NULL;
    }
@@ -74,8 +74,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    FILE *pFile = fopen( font_path, "rb" );
    if( ! pFile )
    {
-      fprintf( stderr, "Failed to open font file: %s\n", font_path );
-
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_FILE_OPEN, "Failed to open font file: %s", font_path );
       // Increment the counter of failed font loads
       pFont->pHBGL->failedFontCount++;
 
@@ -112,7 +111,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    size_t read_elements = fread( ttf_buffer, 1, size, pFile );
    if( read_elements != size )
    {
-      fprintf( stderr, "Failed to read font file: expected %zu elements, got %zu.\n", size, read_elements );
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_FILE_READ, "Failed to read font file: expected %zu elements, got %zu.", size, read_elements );
       free( ttf_buffer );
       fclose( pFile );
       return NULL;
@@ -123,7 +122,7 @@ static Font *FontNew( HBGL *pHBGL, const char *font_path )
    stbtt_fontinfo  font_info;
    if( ! stbtt_InitFont( &font_info, ttf_buffer, stbtt_GetFontOffsetForIndex( ttf_buffer, 0 ) ) )
    {
-      fprintf( stderr, "Failed to initialize the font.\n" );
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_INITIALIZATION, "Failed to initialize the font." );
       free( ttf_buffer );
       return NULL;
    }
@@ -156,10 +155,10 @@ static Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
       // find / -name your_font.ttf 2>/dev/null
       const char *directories[] =
       {
+         "/usr/share/fonts/truetype/msttcorefonts/",
          "/usr/share/fonts/truetype/",
          "/usr/share/fonts/",
          "/usr/local/share/fonts/",
-         "/usr/share/fonts/truetype/msttcorefonts/",
          NULL // Terminator
       };
 
@@ -179,7 +178,7 @@ static Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
 
    if( ! pFile )
    {
-      fprintf( stderr, "Font file not found in system directories: %s\n", font_name );
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_FILE_NOT_FOUND, "Font file not found in system directories: %s", font_name );
       snprintf( font_path, sizeof( font_path ), "%s.ttf", font_name ); // Przygotowanie ścieżki do nieistniejącego pliku
    }
    else
@@ -191,7 +190,6 @@ static Font *SystemFontNew( HBGL *pHBGL, const char *font_name )
 }
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-
 /* SystemFontNew( pHBGL, font_name ) --> pFont */
 HB_FUNC( SYSTEMFONTNEW )
 {
@@ -266,14 +264,14 @@ HB_FUNC( DRAWFONT )
       }
       else
       {
-         printf( "Invalid hex value passed \n" );
+         REPORT_HBGL_ERROR( HBGL_ERROR_FONT_INVALID_COLOR_VALUE, "An invalid hexadecimal color value was passed." );
       }
 
       // Dekodowanie UTF-8
       int codepoints[ 256 ];
       if( decode_utf8( ( const unsigned char * ) text, codepoints, 256 ) < 0 )
       {
-         fprintf( stderr, "Incorrect sequence UTF-8.\n" );
+         REPORT_HBGL_ERROR( HBGL_ERROR_FONT_UTF8_DECODE, "Incorrect sequence UTF-8." );
          hb_ret();
       }
 
@@ -306,14 +304,14 @@ HB_FUNC( DRAWFONT )
    }
    else
    {
-      // Error code
+      REPORT_HBGL_ERROR( HBGL_ERROR_FONT_DRAW_FONT_FAILED, "Failed to draw font, missing required data (pFont, pHBGL or fonts) for the operation.");
       hb_ret();
    }
 }
 
 void FreeFont( Font *pFont )
 {
-   if( pFont != NULL )
+   if( pFont )
    {
       glDeleteTextures( 1, &pFont->textureID );
       free( pFont );
