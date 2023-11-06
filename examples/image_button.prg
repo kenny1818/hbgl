@@ -7,7 +7,7 @@
 PROCEDURE Main()
 
    LOCAL app := WindowNew( 830, 450, "Test image button" )
-   LOCAL imgBtn := ImageButtonNew( app, "../docs/assets/img/harbour_logo.png", { || openURL("https://github.com/dev-harbour/hbgl-c") } )
+   LOCAL imgBtn := ImageButtonNew( app, "../docs/assets/img/harbour_logo.png", { || openURL("https://github.com/dev-harbour/hbgl" ) } )
    LOCAL startX, startY
 
    Background( app, 0xF1F1F1 )
