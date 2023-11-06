@@ -2,11 +2,10 @@
  * Copyright 2023 Rafał Jopek ( rafaljopek at hotmail com )
  */
 
-#define STB_IMAGE_IMPLEMENTATION
 #include "hbgl.h"
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
-/* ImageNew( pHBGL, image_path ) --> Image | NIL */
+/* ImageNew( pHBGL, image_path ) --> pImage | NIL */
 HB_FUNC( IMAGENEW )
 {
    static int imageCounter = 0;  // Statyczna zmienna do zliczania obrazów

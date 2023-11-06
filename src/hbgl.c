@@ -2,6 +2,10 @@
  * Copyright 2023 Rafał Jopek ( rafaljopek at hotmail com )
  */
 
+#ifndef STB_IMAGE_IMPLEMENTATION
+   #define STB_IMAGE_IMPLEMENTATION
+#endif
+
 #include "hbgl.h"
 
 static ErrLog errorLogs[ MAX_ERROR_LOGS ]; // Tablica do przechowywania informacji o błędach
@@ -111,6 +115,12 @@ static void printDiagnostics( HBGL *pHBGL )
       if( pHBGL->failedImageCount > 0 )
       {
          printf( "Failed to load Images: %d\n", pHBGL->failedImageCount );
+      }
+
+   printf( "Total Images button: %d\n", pHBGL->imageButtonCount );
+      if( pHBGL->failedImageButtonCount > 0 )
+      {
+         printf( "Failed to load Images: %d\n", pHBGL->failedImageButtonCount );
       }
 
    printf( "\n" );
@@ -241,6 +251,11 @@ HB_FUNC( WINDOWNEW )
    pHBGL->imageCount = 0;
    pHBGL->failedImageCount = 0;
 
+   // Image button
+   pHBGL->imagesButton = NULL;
+   pHBGL->imageButtonCount = 0;
+   pHBGL->failedImageButtonCount = 0;
+
    pHBGL->window = glfwCreateWindow( pHBGL->width, pHBGL->height, pHBGL->title, NULL, NULL );
    if( ! pHBGL->window )
    {
@@ -341,9 +356,11 @@ HB_FUNC( CLOSEALL )
          for( int i = 0; i < pHBGL->fontCount; ++i )
          {
             FreeFont( pHBGL->fonts[ i ] );
+            pHBGL->fonts[ i ] = NULL; // Ustawienie wskaźnika na NULL po zwolnieniu
             printf( "Font number %d has been closed successfully.\n", i + 1 );
          }
          free( pHBGL->fonts );
+         pHBGL->fonts = NULL; // Zerowanie wskaźnika na tablicę po jej zwolnieniu
       }
       //---
       if( pHBGL->images != NULL )
@@ -351,9 +368,23 @@ HB_FUNC( CLOSEALL )
          for( int i = 0; i < pHBGL->imageCount; ++i )
          {
             FreeImage( pHBGL->images[ i ] );
+            pHBGL->images[ i ] = NULL; // Ustawienie wskaźnika na NULL po zwolnieniu
             printf( "Image number %d has been closed successfully.\n", i + 1 );
          }
          free( pHBGL->images );
+         pHBGL->images = NULL; // Zerowanie wskaźnika na tablicę po jej zwolnieniu
+      }
+      //---
+      if( pHBGL->imagesButton != NULL )
+      {
+         for( int i = 0; i < pHBGL->imageButtonCount; ++i )
+         {
+            FreeImageButton( pHBGL->imagesButton[ i ] );
+            pHBGL->imagesButton[ i ] = NULL; // Ustawienie wskaźnika na NULL po zwolnieniu
+            printf( "Image button number %d has been closed successfully.\n", i + 1 );
+         }
+         free( pHBGL->imagesButton );
+         pHBGL->imagesButton = NULL; // Zerowanie wskaźnika na tablicę po jej zwolnieniu
       }
 
       glfwDestroyWindow( pHBGL->window );
@@ -386,6 +417,41 @@ HB_FUNC( POLLEVENTS )
 HB_FUNC( WAITEVENTS )
 {
    glfwWaitEvents();
+}
+
+/* openURL( url ) --> NIL */
+HB_FUNC( OPENURL )
+{
+   const char *url = hb_parc( 1 );
+
+   const int commandBufferSize = 256;
+   const int commandPrefixMaxSize = 10; // dla "xdg-open ", "start ", "open "
+
+   if( strlen( url ) > ( commandBufferSize - commandPrefixMaxSize - 1 ) )
+   {
+      fprintf(stderr, "URL is too long\n");
+      return;
+   }
+
+   char command[ commandBufferSize ]; // Utworzenie bufora na komendę
+
+#if defined( _WIN32 ) || defined( _WIN64 )
+   snprintf( command, sizeof( command ), "start %s", url );
+#elif defined( __APPLE__ ) || defined( __MACH__ )
+   snprintf( command, sizeof( command ), "open %s", url );
+#elif defined( __linux__ )
+   snprintf( command, sizeof( command ), "xdg-open %s", url );
+#else
+   fprintf( stderr, "Unsupported platform\n" );
+   return;
+#endif
+
+   // Wykonaj komendę i sprawdź wynik
+   int result = system( command );
+   if( result != 0 )
+   {
+      fprintf( stderr, "Failed to open URL\n" );
+   }
 }
 
 /* SetWindowWidth( pHBGL, width ) --> NIL */

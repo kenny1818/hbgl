@@ -15,6 +15,7 @@
 #include "hbapi.h"
 #include "hbapierr.h"
 #include "hbapiitm.h"
+#include "hbvm.h"
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
 
@@ -55,6 +56,7 @@ typedef struct _HBGL HBGL;
 typedef struct _ErrLog ErrLog;
 typedef struct _Font Font;
 typedef struct _Image Image;
+typedef struct _ImageButton ImageButton;
 
 struct _ErrLog
 {
@@ -86,6 +88,22 @@ struct _Image
    int channels;
 };
 
+struct _ImageButton
+{
+   HBGL *pHBGL;
+   unsigned int textureID;
+   int imageButtonID;
+   int x;
+   int y;
+   int width;
+   int height;
+   int channels;
+   int state;           // Stan przycisku obrazu, np. 0 dla „nieaktywnego”, 1 dla „aktywnego”
+   bool mouseOver;      // Flaga wskazująca, czy wskaźnik myszy znajduje się nad przyciskiem obrazu
+   bool clicked;         // Flaga wskazująca, czy przycisk obrazu został kliknięty
+   void ( *onClick )(); // Funkcja wywoływana po kliknięciu przycisku obrazu
+};
+
 struct _HBGL
 {
    GLFWwindow   *window;       // handle of the created window
@@ -114,6 +132,10 @@ struct _HBGL
    Image **images;             // Pointer to an array of Image structures
    int imageCount;             // Number of images loaded
    int failedImageCount;       // Unloaded image counter
+
+   ImageButton **imagesButton; // Pointer to an array of ImageButton structures
+   int imageButtonCount;       // Number of images button loaded
+   int failedImageButtonCount; // Unloaded image button counter
 };
 
 /* =-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-= */
@@ -122,6 +144,7 @@ HB_EXTERN_BEGIN
 
 extern HB_EXPORT void FreeFont( Font *pFont );
 extern HB_EXPORT void FreeImage( Image *pImage );
+extern HB_EXPORT void FreeImageButton( ImageButton *pImageButton );
 
 extern HB_EXPORT void CheckOpenGLError( const char *stmt, const char *fname, int line, GLenum *errCode );
 extern HB_EXPORT void CheckHBGLError( HBGLErrorCode error_code, const char *file, int line, const char *format, ... );
